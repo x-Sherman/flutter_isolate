@@ -1,7 +1,34 @@
+import 'dart:isolate';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 void main() {
   runApp(const MyApp());
+}
+
+void isolateFunc(int num) {
+  int _count = 0;
+
+  for (int i = 0; i < num; i++) {
+    _count++;
+    if ((_count % 100) == 0) {
+      print('isolate: ' + _count.toString());
+    }
+  }
+}
+
+int copmuteFunc(int num) {
+  int _count = 0;
+
+  for (int i = 0; i < num; i++) {
+    _count++;
+    if ((_count % 100) == 0) {
+      print('compute: ' + _count.toString());
+    }
+  }
+
+  return _count;
 }
 
 class MyApp extends StatelessWidget {
@@ -39,6 +66,17 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+  void initState() {
+    Isolate.spawn(isolateFunc, 1000);
+    super.initState();
+  }
+
+  Future<void> runCompute() async {
+    _counter = await compute(copmuteFunc, 2000);
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -55,6 +93,12 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headline4,
             ),
+            ElevatedButton(
+              onPressed: () async {
+                runCompute();
+              },
+              child: const Text('Add in Isolate'),
+            )
           ],
         ),
       ),
